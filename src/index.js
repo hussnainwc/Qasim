@@ -17,14 +17,57 @@ program
   })
 
 program
-  .command('list')
+  .command('list [license-key]')
   .alias('ls')
   .description('qasim will list all licenses')
-  .action(() => {
-    licenses.forEach((license) => {
+  .action((key) => {
+    if(key){
+
+      var valid_key = false;
+
+      licenses.forEach((license) => {
+        if(license.key === key){
+          axios.get(license.url)
+            .then((response) => {
+              var perms = response.data.permissions;
+              var permLegnth = response.data.permissions.length;
+              var conditions = response.data.conditions;
+              var conditionsLength = response.data.conditions.length;
+              var limitations = response.data.limitations;
+              var limitationsLength = response.data.limitations.length;
+              var description = response.data.description;
+              var longest = Math.max(permLegnth,conditionsLength,limitationsLength);
+              console.log("");
+              console.log(HELPERS.PREETY(" DESCRIPTION : " + description)); // fix how its printed
+              console.log("");
+              console.log('   %s               %s          %s',HELPERS.SUCCESS('permissions'),HELPERS.WARNING('conditions'),HELPERS.ERROR('limitations'));
+              console.log("");
+              for (var i = 0; i < longest; i++) {
+                try {
+                  console.log('  %s%s%s%s%s',perms[i] || "",HELPERS.SPACE.padStart(24 - perms[i].length," "),conditions[i] || "",HELPERS.SPACE.padStart(24 - conditions[i].length," "),limitations[i] || "");
+                } catch (e) {
+                  console.log('  %s%s%s%s%s',perms[i] || "",HELPERS.SPACE.padStart(24 - perms[i].length," "),conditions[i] || "",HELPERS.SPACE.padStart(24," "),limitations[i] || "");
+                }
+              }
+              console.log("");
+            })
+            .catch((error) => {
+              console.log(HELPERS.ERROR("SOMETHING WENT WRONG ! FAILED"));
+            })
+            valid_key = true;
+        }
+      })
+
+      if(!valid_key){
+        console.log(HELPERS.ERROR(HELPERS.SPACE + "INVALID KEY"));
+      }
+    }
+    else{
+      licenses.forEach((license) => {
         console.log(HELPERS.SPACE + '-' + HELPERS.SPACE + HELPERS.PREETY(license.key)
-                    + HELPERS.SPACE.padStart(10 - license.key.length," "),license.name);
-    })
+        + HELPERS.SPACE.padStart(10 - license.key.length," "),license.name);
+      })
+    }
   })
 
 program
@@ -66,7 +109,7 @@ program
             }
           })
           .catch((error) => {
-            console.log(error);
+            console.log(HELPERS.ERROR("SOMETHING WENT WRONG ! FAILED"));
           })
           valid_key = true;
       }
