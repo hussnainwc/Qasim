@@ -6,7 +6,6 @@ const licenses = require('../lib/license.js');
 const axios = require('../lib/requests.js');
 const prompt = require('prompt');
 
-
 program
   .version(HELPERS.VERSION,'-v, --version')
   .on('command:*',() => {
@@ -19,8 +18,9 @@ program
 program
   .command('list [license-key]')
   .alias('ls')
+  .option('-d, --description',false)
   .description('qasim will list all licenses')
-  .action((key) => {
+  .action((key,options) => {
     if(key){
 
       var valid_key = false;
@@ -38,8 +38,6 @@ program
               var description = response.data.description;
               var longest = Math.max(permLegnth,conditionsLength,limitationsLength);
               console.log("");
-              console.log(HELPERS.PREETY(" DESCRIPTION : " + description)); // fix how its printed
-              console.log("");
               console.log('   %s               %s          %s',HELPERS.SUCCESS('permissions'),HELPERS.WARNING('conditions'),HELPERS.ERROR('limitations'));
               console.log("");
               for (var i = 0; i < longest; i++) {
@@ -48,6 +46,10 @@ program
                 } catch (e) {
                   console.log('  %s%s%s%s%s',perms[i] || "",HELPERS.SPACE.padStart(24 - perms[i].length," "),conditions[i] || "",HELPERS.SPACE.padStart(24," "),limitations[i] || "");
                 }
+              }
+              if(!options.description){
+                console.log("");
+                console.log(HELPERS.PREETY(" DESCRIPTION : " + description)); // fix how its printed
               }
               console.log("");
             })
