@@ -88,15 +88,55 @@ program
     if(!options.force){
       fs.access("./LICENSE", fs.F_OK , (error) => {
         if(!error){
-          console.log(HELPERS.ERROR("LICENSE already exists use -f or --force to update anyways"));
+          console.log(HELPERS.ERROR("A LICENSE already exists use -f or --force to update anyways"));
           process.exit(1);
+        }
+      });
+      fs.access("./COPYING", fs.F_OK , (error) => {
+        if(!error){
+          console.log(HELPERS.ERROR("A LICENSE already exists use -f or --force to update anyways"));
+          process.exit(1);
+        }
+      });
+      fs.access("./COPYING.LESSER", fs.F_OK , (error) => {
+        if(!error){
+          console.log(HELPERS.ERROR("A LICENSE already exists use -f or --force to update anyways"));
+          process.exit(1);
+        }
+      });
+      fs.access("./UNLICENSE", fs.F_OK , (error) => {
+        if(!error){
+          console.log(HELPERS.ERROR("A LICENSE already exists use -f or --force to update anyways"));
+          process.exit(1);
+        }
+      });
+    }
+    else{
+      fs.access("./LICENSE", fs.F_OK , (error) => {
+        if(!error){
+          fs.unlinkSync("./LICENSE");
+        }
+      });
+      fs.access("./COPYING", fs.F_OK , (error) => {
+        if(!error){
+          fs.unlinkSync("./COPYING");
+        }
+      });
+      fs.access("./COPYING.LESSER", fs.F_OK , (error) => {
+        if(!error){
+          fs.unlinkSync("./COPYING.LESSER");
+        }
+      });
+      fs.access("./UNLICENSE", fs.F_OK , (error) => {
+        if(!error){
+          fs.unlinkSync("./UNLICENSE");
         }
       });
     }
 
     licenses.forEach((license) => {
 
-      const search = key.match(new RegExp(license.key)) // TODO: improve regex so similar words show up
+      const search = key.match(new RegExp(license.key))
       if(search != null){
         matches.push(license.key);
       }
@@ -105,7 +145,7 @@ program
         axios.get(license.url)
           .then((response) => {
             var string = response.data.body;
-            if(key === "mit" || key === "apache" || key === "agpl"|| key === "gpl"){
+            if(key === "mit" || key === "apache" || key === "agpl"|| key === "gpl" || key === "lgpl"){
               prompt.start();
               prompt.get(['fullname'], ((err, result) => {
                 if (err) {
@@ -115,39 +155,92 @@ program
                   if(key === "mit"){
                     string = string.replace("[year]",new Date().getFullYear());
                     string = string.replace("[fullname]",result.fullname);
+
+                    fs.writeFile("LICENSE", string, (error) => {
+                      if (error) {
+                        console.log(HELPERS.ERROR(error));
+                      }
+                        console.log(HELPERS.SUCCESS("commited!"));
+                    });
                   }
                   else if(key === "apache"){
                     string = string.replace("[yyyy]",new Date().getFullYear());
                     string = string.replace("[name of copyright owner]",result.fullname);
+
+                    fs.writeFile("LICENSE", string, (error) => {
+                      if (error) {
+                        console.log(HELPERS.ERROR(error));
+                      }
+                        console.log(HELPERS.SUCCESS("commited!"));
+                    });
                   }
                   else if(key === "agpl"){
                     string = string.replace("<year>",new Date().getFullYear());
                     string = string.replace("<name of author>",result.fullname);
+
+                    fs.writeFile("LICENSE", string, (error) => {
+                      if (error) {
+                        console.log(HELPERS.ERROR(error));
+                      }
+                        console.log(HELPERS.SUCCESS("commited!"));
+                    });
                   }
                   else if(key === "gpl"){
                     string = string.replace("<year>",new Date().getFullYear());
                     string = string.replace("<name of author>",result.fullname);
                     string = string.replace("<year>",new Date().getFullYear());
                     string = string.replace("<name of author>",result.fullname);
+
+                    fs.writeFile("COPYING", string, (error) => {
+                      if (error) {
+                        console.log(HELPERS.ERROR(error));
+                      }
+                      console.log(HELPERS.SUCCESS("commited!"));
+                    });
                   }
+                  else if(key === "lgpl"){
 
-                  fs.writeFile("LICENSE", string, (error) => {
-                    if (error) {
-                      console.log(HELPERS.ERROR(error));
-                    }
-                    console.log(HELPERS.SUCCESS("commited!"));
-                  });
+                    fs.writeFile("COPYING.LESSER", string, (error) => {
+                      if (error) {
+                        console.log(HELPERS.ERROR(error));
+                      }
+                    });
 
+                    axios.get("https://api.github.com/licenses/gpl-3.0")
+                    .then((response) => {
+                      string = response.data.body;
+                      string = string.replace("<year>",new Date().getFullYear());
+                      string = string.replace("<name of author>",result.fullname);
+                      string = string.replace("<year>",new Date().getFullYear());
+                      string = string.replace("<name of author>",result.fullname);
+                      fs.writeFile("COPYING", string, (error) => {
+                        if (error) {
+                          console.log(HELPERS.ERROR(error));
+                        }
+                        console.log(HELPERS.SUCCESS("commited!"));
+                      });
+                    })
+                  }
                 }
               }));
             }
             else{
-              fs.writeFile("LICENSE", string, (error) => {
-                if (error) {
-                  console.log(HELPERS.ERROR(error));
-                }
+              if(key === "unlicense"){
+                fs.writeFile("UNLICENSE", string, (error) => {
+                  if (error) {
+                    console.log(HELPERS.ERROR(error));
+                  }
                   console.log(HELPERS.SUCCESS("commited!"));
-              });
+                });
+              }
+              else{
+                fs.writeFile("LICENSE", string, (error) => {
+                  if (error) {
+                    console.log(HELPERS.ERROR(error));
+                  }
+                    console.log(HELPERS.SUCCESS("commited!"));
+                });
+              }
             }
           })
           .catch((error) => {
