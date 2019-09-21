@@ -5,6 +5,7 @@ const program = require('../lib/commands.js');
 const licenses = require('../lib/license.js');
 const axios = require('../lib/requests.js');
 const prompt = require('prompt');
+const fs = require("fs");
 
 program
   .version(HELPERS.VERSION,'-v, --version')
@@ -49,8 +50,9 @@ program
               }
               if(!options.description){
                 console.log("");
-                console.log(HELPERS.PREETY(" DESCRIPTION : " + description)); // fix how its printed
-              }
+                console.log(HELPERS.PREETY(" DESCRIPTION : " + description));
+              }var fs = require("fs");
+
               console.log("");
             })
             .catch((error) => {
@@ -75,12 +77,22 @@ program
 program
   .command('commit <license-key>')
   .alias('add')
+  .option('-f, --force',false)
   .description('let qasim know which license to add')
-  .action((key) => {
+  .action((key,options) => {
 
     key = key.toLowerCase();
     var valid_key = false;
     var matches = [];
+
+    if(!options.force){
+      fs.access("./LICENSE", fs.F_OK , (error) => {
+        if(!error){
+          console.log(HELPERS.ERROR("LICENSE already exists use -f or --force to update anyways"));
+          process.exit(1);
+        }
+      });
+    }
 
     licenses.forEach((license) => {
 
@@ -92,22 +104,50 @@ program
       if(license.key === key){
         axios.get(license.url)
           .then((response) => {
-            if(key === "mit"){
+            var string = response.data.body;
+            if(key === "mit" || key === "apache" || key === "agpl"|| key === "gpl"){
               prompt.start();
-              prompt.get(['fullname'], function (err, result) {
+              prompt.get(['fullname'], ((err, result) => {
                 if (err) {
                   console.log(HELPERS.ERROR(err));
                 }
                 else{
-                  var string = response.data.body;
-                  string = string.replace("[year]",new Date().getFullYear());
-                  string = string.replace("[fullname]",result.fullname);
-                  console.log(HELPERS.PREETY(string));
+                  if(key === "mit"){
+                    string = string.replace("[year]",new Date().getFullYear());
+                    string = string.replace("[fullname]",result.fullname);
+                  }
+                  else if(key === "apache"){
+                    string = string.replace("[yyyy]",new Date().getFullYear());
+                    string = string.replace("[name of copyright owner]",result.fullname);
+                  }
+                  else if(key === "agpl"){
+                    string = string.replace("<year>",new Date().getFullYear());
+                    string = string.replace("<name of author>",result.fullname);
+                  }
+                  else if(key === "gpl"){
+                    string = string.replace("<year>",new Date().getFullYear());
+                    string = string.replace("<name of author>",result.fullname);
+                    string = string.replace("<year>",new Date().getFullYear());
+                    string = string.replace("<name of author>",result.fullname);
+                  }
+
+                  fs.writeFile("LICENSE", string, (error) => {
+                    if (error) {
+                      console.log(HELPERS.ERROR(error));
+                    }
+                    console.log(HELPERS.SUCCESS("commited!"));
+                  });
+
                 }
-              });
+              }));
             }
             else{
-              console.log(HELPERS.PREETY(response.data.body));
+              fs.writeFile("LICENSE", string, (error) => {
+                if (error) {
+                  console.log(HELPERS.ERROR(error));
+                }
+                  console.log(HELPERS.SUCCESS("commited!"));
+              });
             }
           })
           .catch((error) => {
