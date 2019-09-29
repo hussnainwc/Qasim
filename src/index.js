@@ -12,9 +12,9 @@ program
   .on('command:*',() => {
     console.error("ERROR:");
     console.log(HELPERS.ERROR(HELPERS.SPACE + program.args.join(' ')
-                + HELPERS.SPACE + "is not a valid command"))
+                + HELPERS.SPACE + "is not a valid command"));
     process.exit(1);
-  })
+  });
 
 program
   .command('list [license-key]')
@@ -24,20 +24,20 @@ program
   .action((key,options) => {
     if(key){
 
-      var valid_key = false;
+      let valid_key = false;
 
       licenses.forEach((license) => {
         if(license.key === key){
           axios.get(license.url)
             .then((response) => {
-              var perms = response.data.permissions;
-              var permLegnth = response.data.permissions.length;
-              var conditions = response.data.conditions;
-              var conditionsLength = response.data.conditions.length;
-              var limitations = response.data.limitations;
-              var limitationsLength = response.data.limitations.length;
-              var description = response.data.description;
-              var longest = Math.max(permLegnth,conditionsLength,limitationsLength);
+              let perms = response.data.permissions;
+              let permLegnth = response.data.permissions.length;
+              let conditions = response.data.conditions;
+              let conditionsLength = response.data.conditions.length;
+              let limitations = response.data.limitations;
+              let limitationsLength = response.data.limitations.length;
+              let description = response.data.description;
+              let longest = Math.max(permLegnth,conditionsLength,limitationsLength);
               console.log("");
               console.log('   %s               %s          %s',HELPERS.SUCCESS('permissions'),HELPERS.WARNING('conditions'),HELPERS.ERROR('limitations'));
               console.log("");
