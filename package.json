@@ -1,6 +1,6 @@
 {
   "name": "qasim",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An Open-source license manager for you Node.Js applications",
   "main": "index.js",
   "bin": {
