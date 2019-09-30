@@ -1,6 +1,6 @@
 {
   "name": "qasim",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An Open-source license manager for you Node.Js applications",
   "main": "index.js",
   "bin": {
@@ -21,7 +21,7 @@
     "url": "https://github.com/hussnainwc/Qasim/issues"
   },
   "homepage": "https://github.com/hussnainwc/Qasim#readme",
-  "devDependencies": {
+  "dependencies": {
     "axios": "^0.19.0",
     "chalk": "^2.4.2",
     "commander": "^3.0.2",
